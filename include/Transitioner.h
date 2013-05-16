@@ -12,12 +12,12 @@
  *
  */
 
-#import <iostream>
-#import "Map.h"
-#import "Coordinate.h"
-#import "Location.h"
-#import "cinder/CinderMath.h"
-#import "cinder/Vector.h"
+#include <iostream>
+#include "Map.h"
+#include "Coordinate.h"
+#include "Location.h"
+#include "cinder/CinderMath.h"
+#include "cinder/Vector.h"
 
 namespace cinder { namespace modestmaps {
 	

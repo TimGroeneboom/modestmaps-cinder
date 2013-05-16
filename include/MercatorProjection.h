@@ -37,7 +37,7 @@ public:
 	}
 	
 	Vec2d rawUnproject(const Vec2d &point) {
-		return Vec2d(point.x, 2.0 * atan(pow(M_E, point.y)) - 0.5 * M_PI);
+		return Vec2d(point.x, 2.0 * atan(pow(FLT_MIN, point.y)) - 0.5 * M_PI);
 	}
 	
 };

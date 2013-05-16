@@ -10,7 +10,7 @@ void Map::setup( MapProviderRef _mapProvider, Vec2d _size )
     size = _size;
     centerCoordinate = Coordinate(0.5,0.5,0);  // half the world width,height at zoom 0
     // fit to screen
-    double z = log2(std::min(size.x,size.y) / 256.0); // FIXME: use provider's getTileSize
+    double z = log2floor(std::min(size.x,size.y) / 256.0); // FIXME: use provider's getTileSize
     centerCoordinate = centerCoordinate.zoomTo(z);
     // start with north up:
     rotation = 0.0;
@@ -28,7 +28,7 @@ void Map::update() {
 void Map::draw() {
 	
 	// if we're in between zoom levels, we need to choose the nearest:
-	int baseZoom = constrain((int)round(centerCoordinate.zoom), mapProvider->getMinZoom(), mapProvider->getMaxZoom());
+	int baseZoom = constrain((int)floor(centerCoordinate.zoom+.5), mapProvider->getMinZoom(), mapProvider->getMaxZoom());
 
 	// these are the top left and bottom right tile coordinates
 	// we'll be loading everything in between:
@@ -207,7 +207,7 @@ void Map::scaleBy(const double &s, const double &cx, const double &cy) {
 	rotateBy(-prevRotation,cx,cy);
     Vec2d center = size * 0.5;
 	panBy(-cx+center.x, -cy+center.y);
-	centerCoordinate = centerCoordinate.zoomBy(log2(s));
+	centerCoordinate = centerCoordinate.zoomBy(log2floor(s));
 	panBy(cx-center.x, cy-center.y);
 	rotateBy(prevRotation,cx,cy);
 }
@@ -265,7 +265,7 @@ void Map::setExtent( const MapExtent &extent, bool forceIntZoom )
     const double hFactor = (BR.column - TL.column) / (size.x / tileSize.x);
     
     // multiplication factor expressed as base-2 logarithm, for zoom difference
-    const double hZoomDiff = log2(hFactor);
+    const double hZoomDiff = log2floor(hFactor);
     
     // possible horizontal zoom to fit geographical extent in map width
     const double hPossibleZoom = TL.zoom - (forceIntZoom ? ceil(hZoomDiff) : hZoomDiff);
@@ -274,7 +274,7 @@ void Map::setExtent( const MapExtent &extent, bool forceIntZoom )
     const double vFactor = (BR.row - TL.row) / (size.y / tileSize.y);
     
     // multiplication factor expressed as base-2 logarithm, for zoom difference
-    const double vZoomDiff = log2(vFactor);
+    const double vZoomDiff = log2floor(vFactor);
     
     // possible vertical zoom to fit geographical extent in map height
     const double vPossibleZoom = TL.zoom - (forceIntZoom ? ceil(vZoomDiff) : vZoomDiff);

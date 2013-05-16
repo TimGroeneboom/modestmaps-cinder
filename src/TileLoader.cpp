@@ -17,17 +17,7 @@ namespace cinder { namespace modestmaps {
 
 void TileLoader::doThreadedPaint( const Coordinate &coord )
 {
-#if defined( CINDER_COCOA )
-	// borrowed from https://llvm.org/svn/llvm-project/lldb/trunk/source/Host/macosx/Host.mm
-  #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
-	// On Leopard and earlier there is no way objc_registerThreadWithCollector
-	// function, so we do it manually.
-	auto_zone_register_thread(auto_zone());
-  #else
-	// On SnowLoepard and later we just call the thread registration function.
-	objc_registerThreadWithCollector();
-  #endif	
-#endif	
+
 
 	Surface image;
     
@@ -47,7 +37,7 @@ void TileLoader::doThreadedPaint( const Coordinate &coord )
 
 void TileLoader::processQueue(std::vector<Coordinate> &queue )
 {
-	while (pending.size() < MAX_PENDING && queue.size() > 0) {
+	while (pending.size() < 1 && queue.size() > 0) {
 		Coordinate key = *(queue.begin());
 		queue.erase(queue.begin());
 
@@ -56,7 +46,8 @@ void TileLoader::processQueue(std::vector<Coordinate> &queue )
         pendingCompleteMutex.unlock();	
         
         // TODO: consider using a single thread and a queue, rather than a thread per load?
-        std::thread loaderThread( &TileLoader::doThreadedPaint, this, key );        
+        std::thread loaderThread( &TileLoader::doThreadedPaint, this, key );     
+		loaderThread.join();
 	}
 }
 
