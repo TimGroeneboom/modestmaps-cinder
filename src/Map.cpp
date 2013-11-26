@@ -1,6 +1,6 @@
 
 #include "Map.h"
-
+#include "cinder/app/app.h"
 namespace cinder { namespace modestmaps {         
     
 void Map::setup( MapProviderRef _mapProvider, Vec2d _size )
@@ -12,21 +12,22 @@ void Map::setup( MapProviderRef _mapProvider, Vec2d _size )
     // fit to screen
     double z = log2floor(std::min(size.x,size.y) / 256.0); // FIXME: use provider's getTileSize
     centerCoordinate = centerCoordinate.zoomTo(z);
+		
     // start with north up:
     rotation = 0.0;
 }     
 	
 void Map::update() {
-	// TODO: Move non-drawing logic here
-//    std::cout << "images:       " << images.size() << std::endl;
-//    std::cout << "queue:        " << queue.size() << std::endl;
-//    std::cout << "recentImages: " << recentImages.size() << std::endl;
-//    std::cout << "visibleKeys:  " << visibleKeys.size() << std::endl;
-//    std::cout << "-------------------" << std::endl << std::endl;
+	
 }
 
 void Map::draw() {
-	
+	// TODO: Move non-drawing logic here
+    /*ci::app::console() << "images:       " << images.size() << std::endl;
+    ci::app::console() << "queue:        " << queue.size() << std::endl;
+    ci::app::console() << "recentImages: " << recentImages.size() << std::endl;
+    ci::app::console() << "visibleKeys:  " << visibleKeys.size() << std::endl;
+    ci::app::console() << "-------------------" << std::endl << std::endl;*/
 	// if we're in between zoom levels, we need to choose the nearest:
 	int baseZoom = constrain((int)floor(centerCoordinate.zoom+.5), mapProvider->getMinZoom(), mapProvider->getMaxZoom());
 
@@ -66,7 +67,7 @@ void Map::draw() {
 				grabTile(coord);
 				
 				// see if we have  a parent coord for this tile?
-				bool gotParent = false;
+				/*bool gotParent = false;
 				for (int i = (int)coord.zoom; i > 0; i--) {
 					Coordinate zoomed = coord.zoomTo(i).container();
 //					if (images.count(zoomed) > 0) {
@@ -81,22 +82,24 @@ void Map::draw() {
 						// force load of parent tiles we don't already have
 						grabTile(zoomed);
 					}					
-				}
+				}*/
 				
 				// or if we have any of the children
-//				if (!gotParent) {
-//					Coordinate zoomed = coord.zoomBy(1).container();
-//					std::vector<Coordinate> kids;
-//					kids.push_back(zoomed);
-//					kids.push_back(zoomed.right());
-//					kids.push_back(zoomed.down());
-//					kids.push_back(zoomed.right().down());
-//					for (int i = 0; i < kids.size(); i++) {
-//						if (images.count(kids[i]) > 0) {
-//							visibleKeys.insert(kids[i]);
-//						}
-//					}            
-//				}
+				//if (!gotParent) {
+				/*for (int i = 0; i < 2; i++) {
+					Coordinate zoomed = coord.zoomTo((int)coord.zoom+i).container();
+					std::vector<Coordinate> kids;
+					kids.push_back(zoomed);
+					kids.push_back(zoomed.right());
+					kids.push_back(zoomed.down());
+					kids.push_back(zoomed.right().down());
+					for (int j = 0; j < kids.size(); j++) {
+						//if (images.count(kids[j]) > 0) {
+							visibleKeys.insert(kids[j]);
+							grabTile(kids[j]);
+						//}
+					}            
+				}*/
 				
 			}
 			
@@ -207,7 +210,10 @@ void Map::scaleBy(const double &s, const double &cx, const double &cy) {
 	rotateBy(-prevRotation,cx,cy);
     Vec2d center = size * 0.5;
 	panBy(-cx+center.x, -cy+center.y);
-	centerCoordinate = centerCoordinate.zoomBy(log2floor(s));
+	centerCoordinate = centerCoordinate.zoomBy(s);
+	ci::app::console() << "scale " << log2ceil(s) << " s " << s << std::endl;
+	cinder::app::console() << " centerCoordinate " << centerCoordinate << std::endl;
+	
 	panBy(cx-center.x, cy-center.y);
 	rotateBy(prevRotation,cx,cy);
 }
@@ -370,11 +376,7 @@ void Map::grabTile(const Coordinate &coord) {
     if (!isAlreadyLoaded) {
         bool isQueued = find(queue.begin(), queue.end(), coord) != queue.end();
         if (!isQueued) {
-            // do this one last because it blocks TileLoader
-            bool isPending = tileLoader->isPending(coord);
-            if (!isPending) {
-                queue.push_back(coord);
-            }
+            queue.push_back(coord);
         }
     }
 }

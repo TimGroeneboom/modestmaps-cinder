@@ -8,6 +8,10 @@
  */
 
 #include "TileLoader.h"
+#include "cinder/app/app.h"
+#include "cinder/ImageIo.h"
+
+#include "cinder/Utilities.h"
 
 #if defined( CINDER_COCOA )
 #include <objc/objc-auto.h>
@@ -17,8 +21,8 @@ namespace cinder { namespace modestmaps {
 
 void TileLoader::doThreadedPaint( const Coordinate &coord )
 {
-
-
+	
+	ci::app::console() << "loading " << coord << std::endl;
 	Surface image;
     
     if (provider) {
@@ -37,33 +41,36 @@ void TileLoader::doThreadedPaint( const Coordinate &coord )
 
 void TileLoader::processQueue(std::vector<Coordinate> &queue )
 {
-	while (pending.size() < 1 && queue.size() > 0) {
+	//ci::app::console() << "processQueue size " << queue.size() << std::endl;
+	while (queue.size() > 0) {
 		Coordinate key = *(queue.begin());
 		queue.erase(queue.begin());
-
-        pendingCompleteMutex.lock();
-        pending.insert(key);
-        pendingCompleteMutex.unlock();	
-        
-        // TODO: consider using a single thread and a queue, rather than a thread per load?
-        std::thread loaderThread( &TileLoader::doThreadedPaint, this, key );     
-		loaderThread.join();
+	//	ci::app::console() << "processQueue size " << queue.size() << std::endl;
+       // ci::app::console() << "loading " << key << std::endl;
+		Surface image;
+    
+		if (provider) {
+			image = provider->createSurface( key );
+		}
+		if (image) {
+			completed[key] = image;
+			//	 ci::app::console() << "loaded image for " << key << std::endl;
+		}
 	}
 }
 
 void TileLoader::transferTextures(std::map<Coordinate, gl::Texture> &images)
 {
     // use try_lock because we can just wait until next frame if needed
-    if (pendingCompleteMutex.try_lock()) {
-        if (!completed.empty()) {
-            std::map<Coordinate, Surface>::iterator iter = completed.begin();
-            if (iter->second) {
-                images[iter->first] = gl::Texture(iter->second);		
-            }
-            completed.erase(iter);
+   
+    while (!completed.empty()) {
+        std::map<Coordinate, Surface>::iterator iter = completed.begin();
+        if (iter->second) {
+            images[iter->first] = gl::Texture(iter->second);		
         }
-        pendingCompleteMutex.unlock();
+        completed.erase(iter);
     }
+       
 }
     
 bool TileLoader::isPending(const Coordinate &coord)
