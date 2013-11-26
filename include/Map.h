@@ -22,10 +22,10 @@ namespace cinder { namespace modestmaps {
 // limit tiles in memory
 // 256 would be 64 MB, you may want to lower this quite a bit for your app
 // (we'll always keep as many images as needed to fill the screen though)
-#define MAX_IMAGES_TO_KEEP 2056
+#define MAX_IMAGES_TO_KEEP 256
 
 // upping this can help appearances when zooming out, but also loads many more tiles
-#define GRID_PADDING 5
+#define GRID_PADDING 0
 
 
 class Map {

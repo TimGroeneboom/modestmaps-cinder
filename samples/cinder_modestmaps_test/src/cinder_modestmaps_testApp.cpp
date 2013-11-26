@@ -2,7 +2,7 @@
 #include "Map.h"
 //#include "TemplatedMapProvider.h"
 #include "BingMapsProvider.h"
-//#include "OpenStreetMapProvider.h"
+#include "OpenStreetMapProvider.h"
 #include "Transitioner.h"
 #include "cinder/Rand.h"
 
@@ -49,8 +49,8 @@ void cinder_modestmaps_testApp::setup()
 {
 	setFrameRate(60.0);
 
-	//map.setup(new OpenStreetMapProvider(), this->getWindowWidth()/*2.0*/, this->getWindowHeight()/*2.0*/);
-	map.setup( BingMapsProvider::create(), Vec2d(this->getWindowWidth(),this->getWindowHeight()));
+	map.setup(OpenStreetMapProvider::create(), Vec2d(this->getWindowWidth()/*2.0*/, this->getWindowHeight())/*2.0*/);
+	//map.setup( BingMapsProvider::create(), Vec2d(this->getWindowWidth(),this->getWindowHeight()));
 	transitioner.setMap(&map);
 }
 
